@@ -8,7 +8,6 @@ class Book extends Model
 {
 protected $fillable = ['title', 'author_id', 'genre_id', 'description'];
 
-    // Relacionamentos
     public function author()
     {
         return $this->belongsTo(Author::class);
@@ -24,7 +23,6 @@ protected $fillable = ['title', 'author_id', 'genre_id', 'description'];
         return $this->hasMany(Review::class);
     }
 
-    // Comportamento: Ao deletar um livro, deleta suas reviews
     protected static function boot()
     {
         parent::boot();
