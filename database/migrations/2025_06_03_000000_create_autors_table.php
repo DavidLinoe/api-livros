@@ -12,7 +12,7 @@ return new class extends Migration
 public function up()
 {
     Schema::create('authors', function (Blueprint $table) {
-        $table->id(); // Isso cria uma coluna 'id' bigint unsigned
+        $table->id();
         $table->string('name');
         $table->text('bio')->nullable();
         $table->timestamps();

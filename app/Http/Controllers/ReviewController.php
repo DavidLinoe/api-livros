@@ -1,31 +1,42 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
     public function index()
     {
-        return Review::all();
+        return Review::with(['book', 'user'])->get();
     }
 
     public function store(Request $request)
     {
-        // Validação simples da nota (0-5)
-        $request->validate(['rating' => 'required|integer|between:0,5']);
-        return Review::create($request->all());
+        $validated = $request->validate([
+            'rating' => 'required|integer|between:0,5',
+            'comment' => 'nullable|string',
+            'book_id' => 'required|exists:books,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        return Review::create($validated);
     }
 
     public function show(Review $review)
     {
-        return $review;
+        return $review->load(['book', 'user']);
     }
 
     public function update(Request $request, Review $review)
     {
-        $request->validate(['rating' => 'integer|between:0,5']);
-        $review->update($request->all());
+        $validated = $request->validate([
+            'rating' => 'sometimes|integer|between:0,5',
+            'comment' => 'sometimes|nullable|string',
+        ]);
+
+        $review->update($validated);
         return $review;
     }
 
@@ -35,9 +46,8 @@ class ReviewController extends Controller
         return response()->noContent();
     }
 
-    // Rota adicional: Reviews de um usuário
     public function userReviews($userId)
     {
-        return Review::where('user_id', $userId)->get();
+        return Review::with('book')->where('user_id', $userId)->get();
     }
 }

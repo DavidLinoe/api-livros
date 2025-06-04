@@ -3,39 +3,31 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\RateLimiter; // 👈 IMPORTANTE!
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    /**
-     * This namespace is applied to your controller routes.
-     *
-     * @var string|null
-     */
-    // Deixa NULL para usar FQCN nos controllers
     protected $namespace = null;
 
-    /**
-     * Define your route model bindings, pattern filters, etc.
-     */
     public function boot(): void
     {
+        // 👇 Agora sim vai funcionar
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
         parent::boot();
     }
 
-    /**
-     * Define the routes for the application.
-     */
     public function map(): void
     {
         $this->mapApiRoutes();
-
         $this->mapWebRoutes();
     }
 
-    /**
-     * Define the "api" routes for the application.
-     */
     protected function mapApiRoutes(): void
     {
         Route::prefix('api')
@@ -44,9 +36,6 @@ class RouteServiceProvider extends ServiceProvider
             ->group(base_path('routes/api.php'));
     }
 
-    /**
-     * Define the "web" routes for the application.
-     */
     protected function mapWebRoutes(): void
     {
         Route::middleware('web')

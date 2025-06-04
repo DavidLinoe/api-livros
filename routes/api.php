@@ -2,25 +2,36 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-    AuthorController,
     BookController,
+    AuthorController,
     GenreController,
-    ReviewController
+    ReviewController,
+    UserController
 };
+use Illuminate\Http\Request;
 
+Route::get('/status', function() {
+    return response()->json([
+        'status' => 'online',
+        'message' => 'API de Livros funcionando'
+    ]);
+}); // faltava ponto e vírgula aqui
 
-Route::get('/', function () {
-    return response()->json(['message' => 'API funcionando!']);
-});
-
-Route::prefix('v1')->group(function () {
-    Route::apiResource('authors', AuthorController::class);
+Route::group([], function () {
+    // Rotas CRUD principais
     Route::apiResource('books', BookController::class);
+    Route::apiResource('authors', AuthorController::class);
     Route::apiResource('genres', GenreController::class);
     Route::apiResource('reviews', ReviewController::class);
+    Route::apiResource('users', UserController::class); // aqui era 'reviews' repetido
 
-    Route::get('authors/{author}/books', [AuthorController::class, 'books']);
-    Route::get('books/{book}/reviews', [BookController::class, 'reviews']);
-    Route::get('genres/{genre}/books', [GenreController::class, 'books']);
-    Route::get('users/{user}/reviews', [ReviewController::class, 'userReviews']);
+    // Rotas de relacionamento
+    Route::get('/books/{book}/reviews', [BookController::class, 'reviews'])
+        ->name('books.reviews');
+
+    Route::get('/authors/{author}/books', [AuthorController::class, 'books'])
+        ->name('authors.books');
+
+    Route::get('/genres/{genre}/books', [GenreController::class, 'books'])
+        ->name('genres.books');
 });

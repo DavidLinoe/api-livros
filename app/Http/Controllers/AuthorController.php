@@ -1,7 +1,9 @@
 <?php  
+
 namespace App\Http\Controllers;
 
 use App\Models\Author;
+use Illuminate\Http\Request;
 
 class AuthorController extends Controller
 {
@@ -12,7 +14,12 @@ class AuthorController extends Controller
 
     public function store(Request $request)
     {
-        return Author::create($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'required|string|max:255',
+        ]);
+
+        return Author::create($validated);
     }
 
     public function show(Author $author)
@@ -22,7 +29,11 @@ class AuthorController extends Controller
 
     public function update(Request $request, Author $author)
     {
-        $author->update($request->all());
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+        ]);
+
+        $author->update($validated);
         return $author;
     }
 
@@ -32,9 +43,8 @@ class AuthorController extends Controller
         return response()->noContent();
     }
 
-    // Rota adicional: Livros de um autor
     public function books(Author $author)
     {
-        return $author->books;
+        return $author->books()->with(['genre', 'reviews'])->get();
     }
 }

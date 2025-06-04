@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Genre;
+use Illuminate\Http\Request;
 
 class GenreController extends Controller
 {
@@ -13,7 +14,11 @@ class GenreController extends Controller
 
     public function store(Request $request)
     {
-        return Genre::create($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        return Genre::create($validated);
     }
 
     public function show(Genre $genre)
@@ -23,7 +28,11 @@ class GenreController extends Controller
 
     public function update(Request $request, Genre $genre)
     {
-        $genre->update($request->all());
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+        ]);
+
+        $genre->update($validated);
         return $genre;
     }
 
@@ -33,9 +42,8 @@ class GenreController extends Controller
         return response()->noContent();
     }
 
-    // Rota adicional: Livros de um gênero
     public function books(Genre $genre)
     {
-        return $genre->books;
+        return $genre->books()->with(['author', 'reviews'])->get();
     }
 }
